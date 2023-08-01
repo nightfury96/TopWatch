@@ -1,6 +1,6 @@
 package com.nightfury.topwatch.core.data.api
 
-import com.nightfury.topwatch.core.domain.model.MovieList
+import com.nightfury.topwatch.core.data.model.MovieList
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

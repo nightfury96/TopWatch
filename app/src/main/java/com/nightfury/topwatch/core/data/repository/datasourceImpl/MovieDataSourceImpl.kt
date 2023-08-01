@@ -9,8 +9,8 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.nightfury.topwatch.core.data.api.MoviesApiService
 import com.nightfury.topwatch.core.data.db.MoviesDB
+import com.nightfury.topwatch.core.data.model.MovieDto
 import com.nightfury.topwatch.core.data.repository.datasource.MovieDataSource
-import com.nightfury.topwatch.core.domain.model.Movie
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalPagingApi::class)
@@ -20,7 +20,7 @@ class MovieDataSourceImpl(
     moviesDB: MoviesDB
 ) : MovieDataSource {
     val movieDao = moviesDB.movieDao()
-    override fun getTopMovie(): Flow<PagingData<Movie>> {
+    override fun getTopMovie(): Flow<PagingData<MovieDto>> {
         return Pager(
             config = PagingConfig(25),
             pagingSourceFactory = { movieDao.getAllMovies() },
@@ -28,14 +28,14 @@ class MovieDataSourceImpl(
         ).flow
     }
 
-    override fun getMovie(movieId: Long): Movie? {
-        return movieDao.getMovies(movieId)
+    override fun getMovie(movieId: Long): MovieDto? {
+        return movieDao.getMovie(movieId)
     }
 
-    private inner class MovieMediator : RemoteMediator<Int, Movie>() {
+    private inner class MovieMediator : RemoteMediator<Int, MovieDto>() {
         override suspend fun load(
             loadType: LoadType,
-            state: PagingState<Int, Movie>
+            state: PagingState<Int, MovieDto>
         ): MediatorResult {
             val pageNumber = when (loadType) {
                 LoadType.REFRESH -> {
@@ -53,10 +53,10 @@ class MovieDataSourceImpl(
             return try {
                 val req = moviesApiService.getPopularMovies(apiKey, pageNumber)
                 if (req.isSuccessful) {
-                    val movies = req.body()
-                    if (movies != null) {
-                        movieDao.insertOrUpdateMovies(movies.list)
-                        MediatorResult.Success(movies.list.size < state.config.pageSize)
+                    val popularMovies = req.body()
+                    if (popularMovies != null) {
+                        movieDao.insertOrUpdateMovies(popularMovies.movies)
+                        MediatorResult.Success(popularMovies.movies.size < state.config.pageSize)
                     }
                 }
                 MediatorResult.Error(Exception("Not successful request with status: ${req.code()} ${req.errorBody()}"))

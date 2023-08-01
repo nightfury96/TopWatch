@@ -5,18 +5,18 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.nightfury.topwatch.core.domain.model.Movie
+import com.nightfury.topwatch.core.data.model.MovieDto
 
 @Dao
 interface MovieDao {
     @Query("SELECT * FROM top_movies")
-    fun getAllMovies(): PagingSource<Int, Movie>
+    fun getAllMovies(): PagingSource<Int, MovieDto>
 
-    @Query("SELECT * FROM top_movies where movieId=:movieId ")
-    fun getMovies(movieId: Long): Movie?
+    @Query("SELECT * FROM top_movies where id=:movieId")
+    fun getMovie(movieId: Long): MovieDto?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertOrUpdateMovies(movies: List<Movie>)
+    fun insertOrUpdateMovies(movies: List<MovieDto>)
 
     @Query("DELETE FROM top_movies")
     suspend fun deleteAllMovies()
